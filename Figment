@@ -1,3 +1,9 @@
+/**
+ *Submitted for verification at Etherscan.io on 2023-03-06
+*/
+
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.17;
 
 interface IUniswapV2Factory {
@@ -561,7 +567,6 @@ contract Figment is ERC20, Ownable {
     address public  FIGMAburn_FBRprizepoolFunding_Wallet;
 
     uint256 private _maxTxAmount;
-    uint256 private _maxWalletSize;
 
     uint256 public  swapTokensAtAmount;
     bool    private swapping;
@@ -670,6 +675,9 @@ contract Figment is ERC20, Ownable {
                 "Cannot exceed maximums.");
         FIGMAtokensburnFundingFeeOnBuy = _FIGMAtokensburnFundingFeeOnBuy;
         FBRprizepoolFundingFeeOnSell = _FBRprizepoolFundingFeeOnSell;
+
+        _totalFeesOnBuy    = FIGMAtokensburnFundingFeeOnBuy;
+        _totalFeesOnSell   = FBRprizepoolFundingFeeOnSell;
     }
 
 
@@ -708,12 +716,6 @@ contract Figment is ERC20, Ownable {
             require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
         }
            
-        if (to != address(pancakeswapV2Router)) {
-            if (!_isExcludedFromLimits[to]) {
-                require(balanceOf(to) + amount <= _maxWalletSize, "Transfer amount exceeds the maxWalletSize.");
-                }
-        }
-
         if (canSwap &&
             !swapping &&
             to == pancakeswapV2Pair &&
@@ -765,18 +767,8 @@ contract Figment is ERC20, Ownable {
         _maxTxAmount = (totalSupply() * percent) / divisor;
     }
 
-    function setMaxWalletSize(uint256 percent, uint256 divisor) external onlyOwner {
-        require((totalSupply() * percent) / divisor >= (totalSupply() / 100), "Max Wallet amt must be above 1% of total supply.");
-        _maxWalletSize = (totalSupply() * percent) / divisor;
-    }
-
     function getMaxTX() external view returns (uint256) {
         return _maxTxAmount / (10**decimals());
-    }
-
-    function getMaxWallet() external view returns (uint256) {
-        return _maxWalletSize / (10**decimals());
-
     }
 
     struct OwnerChosenDividend {
